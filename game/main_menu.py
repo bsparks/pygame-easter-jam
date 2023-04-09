@@ -1,14 +1,15 @@
+from engine.state import State
 import pygame
-from .colors import *
-from .assets import load_music, load_font, load_image
-from .particles import ParticleEmitter
+from engine.colors import *
+from engine.assets import load_music, load_font, load_image
+from engine.particles import ParticleEmitter
 
-class Game():
-    def __init__(self, screen):
-        self.state = "menu"
-        self.screen = screen
+class MainMenu(State):
+    def __init__(self, game):
+        super().__init__(game)
+        self.screen = game.screen
         
-    def startup(self):
+    def enter(self):
         load_music("Merged.mid")
         pygame.mixer.music.play(-1)
         title_font = load_font("PressStart2P-Regular.ttf", 50)
@@ -50,4 +51,3 @@ class Game():
             self.screen.blit(self.title_texts[i], (125 + i * 150, 125))
         for emitter in self.emitters:
             emitter.draw(self.screen)
-        

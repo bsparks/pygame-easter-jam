@@ -1,5 +1,5 @@
 import pygame
-from engine.game import Game
+from game.game import Game
 
 RESOLUTION = (1280, 720)
 
