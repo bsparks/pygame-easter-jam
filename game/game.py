@@ -1,19 +1,29 @@
 from .main_menu import MainMenu
+from .play import PlayState
+
+# temp for testing
+START_STATE = "play"
 
 class Game():
     def __init__(self, screen):
         self.screen = screen
-        self.main_menu = MainMenu(self)
+        self.states = {
+            "main_menu": MainMenu(self),
+            "play": PlayState(self)
+        }
         
-        self.state = self.main_menu
+        self.state = self.states[START_STATE]
         
     def startup(self):
         # do any global preloading?
         self.state.enter()
         
-    def change_state(self, state):
+    def handle_events(self, events):
+        self.state.handle_events(events)
+        
+    def change_state(self, state_name):
         self.state.exit()
-        self.state = state
+        self.state = self.states[state_name]
         self.state.enter()
     
     def update(self, dt):

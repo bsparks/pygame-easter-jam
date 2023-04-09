@@ -27,6 +27,12 @@ class MainMenu(State):
         
         self.big_bunny = load_image("bunny_vamp.png")
         
+    def handle_events(self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.game.change_state("play")
+        
     def update(self, dt):
         # print(f"frame time: {dt}ms")
         for emitter in self.emitters:
