@@ -27,10 +27,11 @@ class PlayState(State):
     def draw(self):
         self.game.screen.fill(GREEN)
         
-        self.level_timer.draw(self.game.screen)
-        
         self.player.draw(self.game.screen)
         
         # draw 100 random bats on the screen
         for p in self.bats:
             self.game.screen.blit(self.bat, p)
+            
+        
+        self.level_timer.draw(self.game.screen)
