@@ -1,1 +1,2 @@
 pygame-ce==2.2.1
+pyfxr==0.3.0
