@@ -1,5 +1,6 @@
 import pygame
 import math
+from pygame.math import Vector2
 from pygame.sprite import Sprite
 from engine.assets import load_music, load_font, load_image
 from engine.event_handler import EventHandler
@@ -15,9 +16,11 @@ class Player(Sprite, EventHandler):
         self.xp = 0
         self.level = 1
         self.input = pygame.math.Vector2(0, 0)
-        self.position = pygame.math.Vector2(0, 0)
         self.image = load_image("mr_bunny.png")
-        self.rect = self.image.get_rect()
+        self.rect = pygame.rect.FRect(self.image.get_rect())
+        # center rect
+        self.rect.centerx -= self.rect.width // 2
+        self.rect.centery -= self.rect.height // 2
         self.move_speed = 10
 
     def take_damage(self, amount):
@@ -71,20 +74,16 @@ class Player(Sprite, EventHandler):
             self.input.x = 1
 
     def update(self, dt):
-        # fix diagonal movement
-        dx, dy = self.input.x, self.input.y
-        if self.input.x != 0 and self.input.y != 0:
-            dx = self.input.x * math.sqrt(2) / 2
-            dy = self.input.y * math.sqrt(2) / 2
-        self.input.x = dx
-        self.input.y = dy
-        movement = self.input * (self.move_speed / 100) * dt
-        self.position += movement
+        if self.input.magnitude() != 0:
+            self.input.normalize_ip()
+        speed = self.move_speed / 100 * dt
+        self.input *= speed
+        self.rect.center += self.input
+        print(self.input)
 
     def draw(self, surface):
-        surface.blit(self.image, self.position + self.rect.center)
+        surface.blit(self.image, self.rect)
         self.debug_draw(surface)
 
     def debug_draw(self, surface):
-        pygame.draw.rect(surface, "red", (self.position[0] + self.rect.centerx,
-                         self.position[1] + self.rect.centery, self.rect.width, self.rect.height), 2)
+        pygame.draw.rect(surface, "red", self.rect, 2)

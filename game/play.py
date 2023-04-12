@@ -1,10 +1,12 @@
 from engine.state import State
 import pygame
 import random
+from pygame.sprite import Group
 from engine.colors import *
 from engine.assets import load_music, load_font, load_image
 from engine.timer import Timer
 from engine.pbar import ProgressBar
+from .xp_pickup import XpPickup
 from .player import Player
 import pyfxr
 
@@ -38,10 +40,11 @@ class PlayState(State):
         self.pickup_sound = pygame.mixer.Sound(buffer=pyfxr.pickup())
         self.pickup_sound.set_volume(0.1)
         
-        self.xp_beans = [(random.randint(0, self.game.screen.get_width()), random.randint(
-            0, self.game.screen.get_height())) for i in range(50)]
-        self.xp_bean = load_image("green_bean.png")
-        self.xp_bean5 = load_image("red_bean.png")
+        self.pickups = Group()
+        for i in range(50):
+            pickup = XpPickup(random.randint(1, 10))
+            pickup.position = (random.randint(0, self.game.screen.get_width()), random.randint(0, self.game.screen.get_height()))
+            self.pickups.add(pickup)
 
     def handle_player_level_up(self):
         self.xp_bar.max_value = self.player.get_xp_needed()
@@ -72,6 +75,13 @@ class PlayState(State):
         self.level_timer.update(dt)
         self.player.update(dt)
         self.xp_bar.value = self.player.xp
+        self.pickups.update(dt)
+        
+        
+        pickups = pygame.sprite.spritecollide(self.player, self.pickups, False)
+        for pickup in pickups:
+            self.pickup_sound.play()
+            pickup.on_pickup(self.player)
 
     def draw(self):
         self.game.screen.fill(GREEN)
@@ -82,8 +92,7 @@ class PlayState(State):
         for p in self.bats:
             self.game.screen.blit(self.bat, p)
             
-        for b in self.xp_beans:
-            self.game.screen.blit(random.choice((self.xp_bean, self.xp_bean5)), b)
+        self.pickups.draw(self.game.screen)
 
         self.level_timer.draw(self.game.screen)
         self.xp_bar.draw(self.game.screen)
