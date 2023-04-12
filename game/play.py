@@ -40,7 +40,7 @@ class PlayState(State):
         
         self.mobs = Group()
         for i in range(10):
-            mob = Mob("egg_bat_1.png")
+            mob = Mob("egg_bat_1.png", (1, 22, 61, 20))
             mob.target = self.player
             mob.rect.center = (random.randint(0, self.game.screen.get_width()), random.randint(0, self.game.screen.get_height()))
             self.mobs.add(mob)
@@ -96,6 +96,9 @@ class PlayState(State):
             
         self.pickups.draw(self.game.screen)
         self.mobs.draw(self.game.screen)
+        # temp debug draw collsion rect
+        for mob in self.mobs:
+            pygame.draw.rect(self.game.screen, "red", mob.collision_rect, 1)
 
         self.level_timer.draw(self.game.screen)
         self.xp_bar.draw(self.game.screen)
