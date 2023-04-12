@@ -79,7 +79,7 @@ class Player(Sprite, EventHandler):
         speed = self.move_speed / 100 * dt
         self.input *= speed
         self.rect.center += self.input
-        print(self.input)
+        # print(self.input)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

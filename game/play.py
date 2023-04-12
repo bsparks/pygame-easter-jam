@@ -8,6 +8,7 @@ from engine.timer import Timer
 from engine.pbar import ProgressBar
 from .xp_pickup import XpPickup
 from .player import Player
+from .mob import Mob
 import pyfxr
 
 
@@ -28,9 +29,6 @@ class PlayState(State):
         self.player = Player()
         self.player.add_listener("level_up", self.handle_player_level_up)
 
-        self.bat = load_image("egg_bat_1.png")
-        self.bats = [(random.randint(0, self.game.screen.get_width()), random.randint(
-            0, self.game.screen.get_height())) for i in range(100)]
         self.xp_bar = ProgressBar(pygame.math.Vector2(
             180, 10), (1000, 16), PURPLE, self.player.get_xp_needed())
         self.level_font = load_font("PressStart2P-Regular.ttf", 16)
@@ -39,6 +37,13 @@ class PlayState(State):
         
         self.pickup_sound = pygame.mixer.Sound(buffer=pyfxr.pickup())
         self.pickup_sound.set_volume(0.1)
+        
+        self.mobs = Group()
+        for i in range(10):
+            mob = Mob("egg_bat_1.png")
+            mob.target = self.player
+            mob.rect.center = (random.randint(0, self.game.screen.get_width()), random.randint(0, self.game.screen.get_height()))
+            self.mobs.add(mob)
         
         self.pickups = Group()
         for i in range(50):
@@ -76,6 +81,7 @@ class PlayState(State):
         self.player.update(dt)
         self.xp_bar.value = self.player.xp
         self.pickups.update(dt)
+        self.mobs.update(dt)
         
         
         pickups = pygame.sprite.spritecollide(self.player, self.pickups, False)
@@ -87,12 +93,9 @@ class PlayState(State):
         self.game.screen.fill(GREEN)
 
         self.player.draw(self.game.screen)
-
-        # draw 100 random bats on the screen
-        for p in self.bats:
-            self.game.screen.blit(self.bat, p)
             
         self.pickups.draw(self.game.screen)
+        self.mobs.draw(self.game.screen)
 
         self.level_timer.draw(self.game.screen)
         self.xp_bar.draw(self.game.screen)
