@@ -85,4 +85,7 @@ class Weapon(Group):
         self.fire_timer.reset()
         
     def spawn_projectile(self):
+        if self.fire_direction.magnitude() == 0:
+            # fire to the right
+            self.fire_direction = Vector2(1, 0)
         projectile = Projectile(self, self.fire_point, self.fire_direction.copy())

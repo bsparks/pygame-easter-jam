@@ -5,8 +5,46 @@ from pygame.sprite import Sprite
 from engine.assets import load_music, load_font, load_image
 from engine.event_handler import EventHandler
 from engine.pbar import ProgressBar
+from engine.timer import Timer
 from .weapon import Weapon
 
+upgrade_types = {
+    "health": {
+        "name": "Health",
+        "description": "Increases max health by 10",
+        "attribute": "max_health",
+        "amount": 10,
+        "apply_type": "add",
+    },
+    "health_regen": {
+        "name": "Health Regen",
+        "description": "Regenerates +1 health every second",
+        "attribute": "health_regen",
+        "amount": 1,
+        "apply_type": "add",
+    },
+    "move_speed": {
+        "name": "Move Speed",
+        "description": "Increases move speed by 10%",
+        "attribute": "move_speed",
+        "amount": 1.1,
+        "apply_type": "multiply",
+    },
+    "damage_modifier": {
+        "name": "Damage Modifier",
+        "description": "Increases damage by 10% to all weapons",
+        "attribute": "damage_modifier",
+        "amount": 0.1,
+        "apply_type": "add",
+    },
+    "damage_base": {
+        "name": "Damage Base",
+        "description": "Increases base damage by 1",
+        "attribute": "damage_base",
+        "amount": 1,
+        "apply_type": "add",
+    },
+}
 
 class Player(Sprite, EventHandler):
     def __init__(self, game):
@@ -15,6 +53,9 @@ class Player(Sprite, EventHandler):
         self.game = game
         self.health = 100
         self.max_health = 100
+        self.health_regen = 0
+        self.damage_modifier = 1
+        self.damage_base = 1
         self.alive = True
         self.xp = 0
         self.level = 1
@@ -28,7 +69,29 @@ class Player(Sprite, EventHandler):
         self.move_speed = 10
         self.weapons = [Weapon("carrot_dagger")]
         self.facing = pygame.math.Vector2(0, 0)
-        self.health_bar = ProgressBar(pygame.math.Vector2(self.rect.topleft), (64, 8), "red", self.max_health, self.health)
+        self.health_bar = ProgressBar(pygame.math.Vector2(self.rect.topleft), (64, 4), "red", self.max_health, self.health)
+        self.health_regen_timer = Timer(1000)
+        self.health_regen_timer.add_listener("complete", self.on_health_regen_timer_complete)
+        self.health_regen_timer.start()
+        
+    def on_health_regen_timer_complete(self):
+        self.heal(self.health_regen)
+        self.health_regen_timer.reset()
+        
+    def apply_upgrade(self, upgrade_type):
+        upgrade_data = upgrade_types[upgrade_type]
+        attribute = upgrade_data["attribute"]
+        apply_type = upgrade_data["apply_type"]
+        amount = upgrade_data["amount"]
+        if apply_type == "add":
+            setattr(self, attribute, getattr(self, attribute) + amount)
+        elif apply_type == "multiply":
+            setattr(self, attribute, getattr(self, attribute) * amount)
+
+    def heal(self, amount):
+        self.health += amount
+        if self.health > self.max_health:
+            self.health = self.max_health
 
     def take_damage(self, amount):
         self.health -= amount
@@ -83,6 +146,8 @@ class Player(Sprite, EventHandler):
     def update(self, dt):
         if not self.alive:
             return
+        
+        self.health_regen_timer.update(dt)
 
         if self.input.magnitude() != 0:
             self.facing.x = self.input.x
@@ -102,6 +167,7 @@ class Player(Sprite, EventHandler):
         
         self.health_bar.position.x = self.rect.topleft[0]
         self.health_bar.position.y = self.rect.topleft[1]
+        self.health_bar.max_value = self.max_health
         self.health_bar.value = self.health
         
         # because the health was modified during this call, we need to check if the player died
@@ -136,7 +202,7 @@ class Player(Sprite, EventHandler):
             for projectile in w:
                 for mob in self.game.state.mobs.group:
                     if projectile.collision_rect.colliderect(mob.collision_rect):
-                        mob.take_damage(projectile.damage)
+                        mob.take_damage((projectile.damage + self.damage_base) * self.damage_modifier)
                         projectile.kill()
                         break
 

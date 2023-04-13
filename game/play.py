@@ -7,13 +7,23 @@ from engine.assets import load_music, load_font, load_image
 from engine.timer import Timer
 from engine.pbar import ProgressBar
 from .xp_pickup import XpPickup
-from .player import Player
+from .player import Player, upgrade_types
 from .mob_factory import MobFactory
 import pyfxr
 
 
 class PlayState(State):
     def enter(self):
+        self.paused = False
+        self.game_over = False
+        self.choose_upgrades = False
+        
+        self.upgrade_selection = []
+        
+        game_over_font = load_font("PressStart2P-Regular.ttf", 64)
+        self.game_over_lose_text = game_over_font.render("You Lose!", True, RED)
+        self.game_over_win_text = game_over_font.render("You Win!", True, YELLOW)
+
         load_music("merged2.mid")
         # pygame.mixer.music.play(-1)
         timer_font = load_font("PressStart2P-Regular.ttf", 32)
@@ -34,10 +44,13 @@ class PlayState(State):
         self.player.add_listener("die", self.handle_player_die)
 
         self.xp_bar = ProgressBar(pygame.math.Vector2(
-            180, 10), (1000, 16), PURPLE, self.player.get_xp_needed())
+            180, 10), (900, 16), PURPLE, self.player.get_xp_needed())
         self.level_font = load_font("PressStart2P-Regular.ttf", 16)
         self.level_text = self.level_font.render(
-            "Level: {}".format(self.player.level), True, "white")
+            "Level: {}".format(self.player.level), True, YELLOW)
+        self.score = 0
+        self.score_font = load_font("PressStart2P-Regular.ttf", 16)
+        self.score_text = self.score_font.render("Score: {}".format(self.score), True, ORANGE)
         
         self.pickup_sound = pygame.mixer.Sound(buffer=pyfxr.pickup())
         self.pickup_sound.set_volume(0.1)
@@ -49,22 +62,43 @@ class PlayState(State):
         self.mobs.start()
         
         self.pickups = Group()
-        for i in range(10):
+        for i in range(20):
             pickup = XpPickup(1)
             pickup.position = (random.randint(0, self.game.screen.get_width()), random.randint(0, self.game.screen.get_height()))
             self.pickups.add(pickup)
             
+    def increase_score(self, amount):
+        self.score += amount
+        self.score_text = self.score_font.render("Score: {}".format(self.score), True, ORANGE)
+            
     def handle_mob_die(self, mob):
         self.pickups.add(XpPickup(mob.xp, mob.rect.center))
+        self.increase_score(mob.xp * 100)
         
     def handle_player_die(self):
-        print("You lose!")
-        self.game.change_state("main_menu")
+        self.paused = True
+        self.game_over = True
 
     def handle_player_level_up(self):
         self.xp_bar.max_value = self.player.get_xp_needed()
         self.level_text = self.level_font.render(
-            "Level: {}".format(self.player.level), True, "white")
+            "Level: {}".format(self.player.level), True, YELLOW)
+        self.increase_score(500)
+        self.setup_upgrades()
+        
+    def setup_upgrades(self):
+        self.paused = True
+        self.choose_upgrades = True
+        # choose 3 of the upgrade_types keys
+        self.upgrade_selection = random.sample(upgrade_types.keys(), 3)
+        self.upgrade_texts = []
+        name_font = load_font("PressStart2P-Regular.ttf", 16)
+        desc_font = load_font("PressStart2P-Regular.ttf", 12)
+        for upgrade in self.upgrade_selection:
+            upgrade_data = upgrade_types[upgrade]
+            name_text = name_font.render(upgrade_data["name"], True, YELLOW)
+            desc_text = desc_font.render(upgrade_data["description"], True, YELLOW, None, 200)
+            self.upgrade_texts.append((name_text, desc_text))
 
     def handle_level_timer_complete(self):
         print("Level complete!")
@@ -77,39 +111,55 @@ class PlayState(State):
             self.mobs.spawn_amount = 2
         
     def handle_level_timer_minute(self, minute):
-        print(f"Minute! {minute}")
+        # print(f"Minute! {minute}")
+        self.increase_score(1000)
         if minute == 1:
             self.mobs.current_mob_types.append("egg_werewolf")
 
     def handle_events(self, events):
-        self.player.handle_events(events)
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.game.change_state("main_menu")
-                if event.key == pygame.K_1:
-                    self.player.add_xp(1)
-                    self.pickup_sound.play()
-                if event.key == pygame.K_2:
-                    self.player.add_xp(5)
-                if event.key == pygame.K_3:
-                    self.player.add_xp(10)
-                if event.key == pygame.K_4:
-                    self.player.add_xp(50)
+                    if self.game_over:
+                        self.game.change_state("main_menu")
+                    elif self.choose_upgrades:
+                        self.player.apply_upgrade(random.choice(self.upgrade_selection))
+                        self.choose_upgrades = False
+                        self.paused = False
+                    else:
+                        self.paused = not self.paused
+                elif event.key == pygame.K_1:
+                    if self.choose_upgrades:
+                        self.player.apply_upgrade(self.upgrade_selection[0])
+                        self.choose_upgrades = False
+                        self.paused = False
+                elif event.key == pygame.K_2:
+                    if self.choose_upgrades:
+                        self.player.apply_upgrade(self.upgrade_selection[1])
+                        self.choose_upgrades = False
+                        self.paused = False
+                elif event.key == pygame.K_3:
+                    if self.choose_upgrades:
+                        self.player.apply_upgrade(self.upgrade_selection[2])
+                        self.choose_upgrades = False
+                        self.paused = False
+
+        if not self.paused:
+            self.player.handle_events(events)
 
     def update(self, dt):
-        self.level_timer.update(dt)
-        self.player.update(dt)
-        self.xp_bar.value = self.player.xp
-        self.pickups.update(dt)
-        self.mobs.update(dt)
-        self.damage_texts.update(dt)
-        
-        
-        pickups = pygame.sprite.spritecollide(self.player, self.pickups, False)
-        for pickup in pickups:
-            self.pickup_sound.play()
-            pickup.on_pickup(self.player)
+        if not self.paused:
+            self.level_timer.update(dt)
+            self.player.update(dt)
+            self.xp_bar.value = self.player.xp
+            self.pickups.update(dt)
+            self.mobs.update(dt)
+            self.damage_texts.update(dt)        
+            
+            pickups = pygame.sprite.spritecollide(self.player, self.pickups, False)
+            for pickup in pickups:
+                self.pickup_sound.play()
+                pickup.on_pickup(self.player)
 
     def draw(self):
         self.game.screen.fill(GREEN)
@@ -124,3 +174,38 @@ class PlayState(State):
         self.xp_bar.draw(self.game.screen)
 
         self.game.screen.blit(self.level_text, (10, 10))
+        self.game.screen.blit(self.score_text, (1100, 10))
+        
+        if self.paused and self.game_over:
+            self.draw_game_over()
+        
+        if self.paused and self.choose_upgrades:
+            self.draw_upgrades()
+        
+    def draw_game_over(self):
+        screen_width = self.game.screen.get_width()
+        screen_height = self.game.screen.get_height()
+        if self.game_over:
+            if not self.player.alive:
+                text_width, text_height = self.game_over_lose_text.get_size()
+                self.game.screen.blit(self.game_over_lose_text, (screen_width // 2 - text_width // 2, screen_height // 2 - text_height // 2))
+            else:
+                text_width, text_height = self.game_over_win_text.get_size()
+                self.game.screen.blit(self.game_over_win_text, (screen_width // 2 - text_width // 2, screen_height // 2 - text_height // 2))
+                
+    def draw_upgrades(self):
+        screen_width, screen_height = self.game.screen.get_size()
+        box_size = 256
+        boxes = []
+        # draw 3 rectangles evenly spaced across the screen for the background
+        for i in range(3):
+            box = pygame.Rect(128 + ((i * box_size) + ((i + 1) * 64)) , screen_height // 2 - box_size // 2, box_size, box_size)
+            boxes.append(box)
+        
+        i = 0
+        for box in boxes:
+            pygame.draw.rect(self.game.screen, PURPLE, box)
+            pygame.draw.rect(self.game.screen, "white", box, 8)
+            self.game.screen.blit(self.upgrade_texts[i][0], (box.x + 16, box.y + 16))
+            self.game.screen.blit(self.upgrade_texts[i][1], (box.x + 16, box.y + 192))
+            i += 1
