@@ -25,6 +25,8 @@ class PlayState(State):
         self.level_timer.start()
         self.level_timer.add_listener(
             "complete", self.handle_level_timer_complete)
+        self.level_timer.add_listener("second", self.handle_level_timer_second)
+        self.level_timer.add_listener("minute", self.handle_level_timer_minute)
 
         self.player = Player(self.game)
         self.player.rect.center = self.game.screen.get_rect().center
@@ -62,6 +64,17 @@ class PlayState(State):
     def handle_level_timer_complete(self):
         print("Level complete!")
         self.game.change_state("main_menu")
+        
+    def handle_level_timer_second(self, second):
+        # print(f"Second! {second}")
+        if second == 30:
+            self.mobs.current_mob_types.append("egg_zombie")
+            self.mobs.spawn_amount = 2
+        
+    def handle_level_timer_minute(self, minute):
+        print(f"Minute! {minute}")
+        if minute == 1:
+            self.mobs.current_mob_types.append("egg_werewolf")
 
     def handle_events(self, events):
         self.player.handle_events(events)

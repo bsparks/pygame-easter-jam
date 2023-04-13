@@ -13,7 +13,23 @@ mob_types = {
         "speed": 5,
         "damage": 1,
         "xp": 1,
-    }
+    },
+    "egg_zombie": {
+        "image_name": "egg_choc_zombie.png",
+        "collision_rect": (16, 8, 33, 47),
+        "health": 4,
+        "speed": 3,
+        "damage": 2,
+        "xp": 2,
+    },
+    "egg_werewolf": {
+        "image_name": "egg_werewolf.png",
+        "collision_rect": (17, 5, 30, 54),
+        "health": 6,
+        "speed": 5,
+        "damage": 5,
+        "xp": 5,
+    },
 }
 
 class MobFactory(EventHandler):
