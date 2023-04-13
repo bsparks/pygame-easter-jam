@@ -4,6 +4,7 @@ from pygame.math import Vector2
 from pygame.sprite import Sprite
 from engine.assets import load_music, load_font, load_image
 from engine.event_handler import EventHandler
+from .weapon import Weapon
 
 
 class Player(Sprite, EventHandler):
@@ -21,7 +22,10 @@ class Player(Sprite, EventHandler):
         # center rect
         self.rect.centerx -= self.rect.width // 2
         self.rect.centery -= self.rect.height // 2
+        self.collision_rect = pygame.rect.FRect((22, 4, 21, 55))
         self.move_speed = 10
+        self.weapons = [Weapon("carrot_dagger")]
+        self.facing = pygame.math.Vector2(0, 0)
 
     def take_damage(self, amount):
         self.health -= amount
@@ -75,15 +79,45 @@ class Player(Sprite, EventHandler):
 
     def update(self, dt):
         if self.input.magnitude() != 0:
+            self.facing.x = self.input.x
+            self.facing.y = self.input.y
             self.input.normalize_ip()
+
         speed = self.move_speed / 100 * dt
         self.input *= speed
         self.rect.center += self.input
         # print(self.input)
+        self.collision_rect.center = self.rect.center
+        for w in self.weapons:
+            side = self.rect.midright
+            fx, fy = self.facing
+            if fx == 1 and fy == 0:
+                side = self.rect.midright
+            elif fx == -1 and fy == 0:
+                side = self.rect.midleft
+            elif fx == 0 and fy == 1:
+                side = self.rect.midbottom
+            elif fx == 0 and fy == -1:
+                side = self.rect.midtop
+            elif fx > 0 and fy > 0:
+                side = self.rect.bottomright
+            elif fx < 0 and fy > 0:
+                side = self.rect.bottomleft
+            elif fx > 0 and fy < 0:
+                side = self.rect.topright
+            elif fx < 0 and fy < 0:
+                side = self.rect.topleft
+                
+            w.fire_point.x = side[0]
+            w.fire_point.y = side[1]
+            w.fire_direction = self.facing
+            w.update(dt)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
         self.debug_draw(surface)
+        for w in self.weapons:
+            w.draw(surface)
 
     def debug_draw(self, surface):
-        pygame.draw.rect(surface, "red", self.rect, 2)
+        pygame.draw.rect(surface, "red", self.collision_rect, 2)

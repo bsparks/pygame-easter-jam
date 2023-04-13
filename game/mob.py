@@ -21,6 +21,8 @@ class Mob(EventHandler, Sprite):
         
         self.move_speed = 5
         self.health = 5
+        self.xp = 1
+        self.damage = 1
         self.target = None
         
     def update(self, dt):

@@ -8,7 +8,7 @@ from engine.timer import Timer
 from engine.pbar import ProgressBar
 from .xp_pickup import XpPickup
 from .player import Player
-from .mob import Mob
+from .mob_factory import MobFactory
 import pyfxr
 
 
@@ -27,6 +27,7 @@ class PlayState(State):
             "complete", self.handle_level_timer_complete)
 
         self.player = Player()
+        self.player.rect.center = self.game.screen.get_rect().center
         self.player.add_listener("level_up", self.handle_player_level_up)
 
         self.xp_bar = ProgressBar(pygame.math.Vector2(
@@ -38,12 +39,8 @@ class PlayState(State):
         self.pickup_sound = pygame.mixer.Sound(buffer=pyfxr.pickup())
         self.pickup_sound.set_volume(0.1)
         
-        self.mobs = Group()
-        for i in range(10):
-            mob = Mob("egg_bat_1.png", (1, 22, 61, 20))
-            mob.target = self.player
-            mob.rect.center = (random.randint(0, self.game.screen.get_width()), random.randint(0, self.game.screen.get_height()))
-            self.mobs.add(mob)
+        self.mobs = MobFactory(self.game)
+        self.mobs.start()
         
         self.pickups = Group()
         for i in range(50):
@@ -96,9 +93,6 @@ class PlayState(State):
             
         self.pickups.draw(self.game.screen)
         self.mobs.draw(self.game.screen)
-        # temp debug draw collsion rect
-        for mob in self.mobs:
-            pygame.draw.rect(self.game.screen, "red", mob.collision_rect, 1)
 
         self.level_timer.draw(self.game.screen)
         self.xp_bar.draw(self.game.screen)
