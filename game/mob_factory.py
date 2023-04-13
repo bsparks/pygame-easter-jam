@@ -34,7 +34,7 @@ mob_types = {
         "image_name": "egg_barb.png",
         "collision_rect": (13, 5, 38, 53),
         "health": 10,
-        "speed": 5,
+        "speed": 3,
         "damage": 10,
         "xp": 10,
     },
@@ -66,8 +66,8 @@ class MobFactory(EventHandler):
     def handle_mob_die(self, mob):
         self.emit("mob_die", mob)
             
-    def spawn_mob(self):
-        mob_type = random.choice(self.current_mob_types)
+    def spawn_mob(self, type_to_spawn = None):
+        mob_type = random.choice(self.current_mob_types) if type_to_spawn is None else type_to_spawn
         mob_data = mob_types[mob_type]
         mob = Mob(self.game, mob_data["image_name"], mob_data["collision_rect"])
         mob.health = mob_data["health"]
