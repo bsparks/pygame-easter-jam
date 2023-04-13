@@ -30,6 +30,14 @@ mob_types = {
         "damage": 5,
         "xp": 5,
     },
+    "egg_barbarian": {
+        "image_name": "egg_barb.png",
+        "collision_rect": (13, 5, 38, 53),
+        "health": 10,
+        "speed": 5,
+        "damage": 10,
+        "xp": 10,
+    },
 }
 
 class MobFactory(EventHandler):

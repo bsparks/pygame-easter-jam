@@ -28,7 +28,9 @@ class Mob(EventHandler, Sprite):
         self.target = None
         
     def take_damage(self, amount):
-        dmg_text = FloatingText(amount, self.rect.center)
+        # only show decimal if it's not 0
+        render_amount = int(amount) if amount.is_integer() else amount
+        dmg_text = FloatingText(render_amount, self.rect.center)
         self.game.state.damage_texts.add(dmg_text)
         self.health -= amount
         if self.health <= 0:

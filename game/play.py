@@ -9,6 +9,7 @@ from engine.pbar import ProgressBar
 from .xp_pickup import XpPickup
 from .player import Player, upgrade_types
 from .mob_factory import MobFactory
+from engine.particles import ParticleEmitter
 import pyfxr
 
 
@@ -19,6 +20,11 @@ class PlayState(State):
         self.choose_upgrades = False
         
         self.upgrade_selection = []
+        self.upgrade_emitters = []
+        
+        for i in range(5):
+            emitter = ParticleEmitter(pygame.math.Vector2(150 + i * 150, random.randint(10, 500)), random.randint(100, 200), (1, 10), (-1.0, 1.0), (0.1, 1.0), [PURPLE, GREEN, BLUE, ORANGE, YELLOW, PINK], 600)
+            self.upgrade_emitters.append(emitter)
         
         game_over_font = load_font("PressStart2P-Regular.ttf", 64)
         self.game_over_lose_text = game_over_font.render("You Lose!", True, RED)
@@ -110,10 +116,23 @@ class PlayState(State):
             self.mobs.current_mob_types.append("egg_zombie")
             self.mobs.spawn_amount = 2
         
+        if second == 90:
+            self.mobs.current_mob_types.append("egg_barbarian")
+            self.mobs.spawn_amount = 3
+            
+        if second == 50:
+            # one time mass spawn
+            for i in range(20):
+                self.mobs.spawn_mob()
+                
+        if second == 110:
+            for i in range(30):
+                self.mobs.spawn_mob()
+        
     def handle_level_timer_minute(self, minute):
         # print(f"Minute! {minute}")
         self.increase_score(1000)
-        if minute == 1:
+        if minute == 2: # technically the first minute has passed immediately
             self.mobs.current_mob_types.append("egg_werewolf")
 
     def handle_events(self, events):
@@ -195,6 +214,11 @@ class PlayState(State):
                 
     def draw_upgrades(self):
         screen_width, screen_height = self.game.screen.get_size()
+        
+        for emitter in self.upgrade_emitters:
+            emitter.update(16)
+            emitter.draw(self.game.screen)
+        
         box_size = 256
         boxes = []
         # draw 3 rectangles evenly spaced across the screen for the background

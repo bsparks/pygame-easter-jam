@@ -202,7 +202,10 @@ class Player(Sprite, EventHandler):
             for projectile in w:
                 for mob in self.game.state.mobs.group:
                     if projectile.collision_rect.colliderect(mob.collision_rect):
-                        mob.take_damage((projectile.damage + self.damage_base) * self.damage_modifier)
+                        damage = (projectile.damage + self.damage_base) * self.damage_modifier
+                        # round to nearest tenth
+                        damage = round(damage * 10) / 10
+                        mob.take_damage(damage)
                         projectile.kill()
                         break
 
