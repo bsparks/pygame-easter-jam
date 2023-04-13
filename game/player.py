@@ -4,6 +4,7 @@ from pygame.math import Vector2
 from pygame.sprite import Sprite
 from engine.assets import load_music, load_font, load_image
 from engine.event_handler import EventHandler
+from engine.pbar import ProgressBar
 from .weapon import Weapon
 
 
@@ -27,6 +28,7 @@ class Player(Sprite, EventHandler):
         self.move_speed = 10
         self.weapons = [Weapon("carrot_dagger")]
         self.facing = pygame.math.Vector2(0, 0)
+        self.health_bar = ProgressBar(pygame.math.Vector2(self.rect.topleft), (64, 8), "red", self.max_health, self.health)
 
     def take_damage(self, amount):
         self.health -= amount
@@ -79,6 +81,9 @@ class Player(Sprite, EventHandler):
             self.input.x = 1
 
     def update(self, dt):
+        if not self.alive:
+            return
+
         if self.input.magnitude() != 0:
             self.facing.x = self.input.x
             self.facing.y = self.input.y
@@ -89,6 +94,20 @@ class Player(Sprite, EventHandler):
         self.rect.center += self.input
         # print(self.input)
         self.collision_rect.center = self.rect.center
+        
+        # for now just have the player check for collisions with mobs directly
+        for mob in self.game.state.mobs.group:
+            if self.collision_rect.colliderect(mob.collision_rect):
+                self.take_damage(mob.damage)
+        
+        self.health_bar.position.x = self.rect.topleft[0]
+        self.health_bar.position.y = self.rect.topleft[1]
+        self.health_bar.value = self.health
+        
+        # because the health was modified during this call, we need to check if the player died
+        if not self.alive:
+            return
+        
         # TODO: this is messy, find a better way
         for w in self.weapons:
             side = self.rect.midright
@@ -122,8 +141,12 @@ class Player(Sprite, EventHandler):
                         break
 
     def draw(self, surface):
+        if not self.alive:
+            return
+
         surface.blit(self.image, self.rect)
-        self.debug_draw(surface)
+        self.health_bar.draw(surface)
+        # self.debug_draw(surface)
         for w in self.weapons:
             w.draw(surface)
 

@@ -31,6 +31,7 @@ class PlayState(State):
         self.player = Player(self.game)
         self.player.rect.center = self.game.screen.get_rect().center
         self.player.add_listener("level_up", self.handle_player_level_up)
+        self.player.add_listener("die", self.handle_player_die)
 
         self.xp_bar = ProgressBar(pygame.math.Vector2(
             180, 10), (1000, 16), PURPLE, self.player.get_xp_needed())
@@ -55,6 +56,10 @@ class PlayState(State):
             
     def handle_mob_die(self, mob):
         self.pickups.add(XpPickup(mob.xp, mob.rect.center))
+        
+    def handle_player_die(self):
+        print("You lose!")
+        self.game.change_state("main_menu")
 
     def handle_player_level_up(self):
         self.xp_bar.max_value = self.player.get_xp_needed()
