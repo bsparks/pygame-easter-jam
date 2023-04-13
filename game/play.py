@@ -42,13 +42,17 @@ class PlayState(State):
         self.damage_texts = Group()
         
         self.mobs = MobFactory(self.game)
+        self.mobs.add_listener("mob_die", self.handle_mob_die)
         self.mobs.start()
         
         self.pickups = Group()
-        for i in range(50):
-            pickup = XpPickup(random.randint(1, 10))
+        for i in range(10):
+            pickup = XpPickup(1)
             pickup.position = (random.randint(0, self.game.screen.get_width()), random.randint(0, self.game.screen.get_height()))
             self.pickups.add(pickup)
+            
+    def handle_mob_die(self, mob):
+        self.pickups.add(XpPickup(mob.xp, mob.rect.center))
 
     def handle_player_level_up(self):
         self.xp_bar.max_value = self.player.get_xp_needed()

@@ -35,7 +35,7 @@ class Mob(EventHandler, Sprite):
             self.die()
             
     def die(self):
-        self.emit("die")
+        self.emit("die", self)
         self.kill()
         
     def update(self, dt):

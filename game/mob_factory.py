@@ -3,6 +3,7 @@ import pygame
 from pygame.sprite import Group
 from engine.timer import Timer
 from .mob import Mob
+from engine.event_handler import EventHandler
 
 mob_types = {
     "egg_bat": {
@@ -15,8 +16,9 @@ mob_types = {
     }
 }
 
-class MobFactory:
+class MobFactory(EventHandler):
     def __init__(self, game):
+        EventHandler.__init__(self)
         self.game = game
         self.spawn_time = 5000
         self.spawn_timer = Timer(self.spawn_time)
@@ -36,6 +38,9 @@ class MobFactory:
         for i in range(self.spawn_amount):
             self.spawn_mob()
         self.spawn_timer.reset()
+        
+    def handle_mob_die(self, mob):
+        self.emit("mob_die", mob)
             
     def spawn_mob(self):
         mob_type = random.choice(self.current_mob_types)
@@ -46,6 +51,7 @@ class MobFactory:
         mob.damage = mob_data["damage"]
         mob.xp = mob_data["xp"]
         mob.target = self.game.state.player
+        mob.add_listener("die", self.handle_mob_die)
         screen_width = self.game.screen.get_width()
         screen_height = self.game.screen.get_height()
         # spawn somewhere outside the screen, near the edge
@@ -70,5 +76,5 @@ class MobFactory:
     def draw(self, surface):
         self.group.draw(surface)
         # temp debug draw collsion rect
-        for mob in self.group:
-            pygame.draw.rect(self.game.screen, "red", mob.collision_rect, 1)
+        #for mob in self.group:
+            #pygame.draw.rect(self.game.screen, "red", mob.collision_rect, 1)
