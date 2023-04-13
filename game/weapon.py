@@ -85,4 +85,4 @@ class Weapon(Group):
         self.fire_timer.reset()
         
     def spawn_projectile(self):
-        projectile = Projectile(self, self.fire_point, self.fire_direction)
+        projectile = Projectile(self, self.fire_point, self.fire_direction.copy())

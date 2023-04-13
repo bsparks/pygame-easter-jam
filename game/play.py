@@ -26,7 +26,7 @@ class PlayState(State):
         self.level_timer.add_listener(
             "complete", self.handle_level_timer_complete)
 
-        self.player = Player()
+        self.player = Player(self.game)
         self.player.rect.center = self.game.screen.get_rect().center
         self.player.add_listener("level_up", self.handle_player_level_up)
 
@@ -38,6 +38,8 @@ class PlayState(State):
         
         self.pickup_sound = pygame.mixer.Sound(buffer=pyfxr.pickup())
         self.pickup_sound.set_volume(0.1)
+        
+        self.damage_texts = Group()
         
         self.mobs = MobFactory(self.game)
         self.mobs.start()
@@ -79,6 +81,7 @@ class PlayState(State):
         self.xp_bar.value = self.player.xp
         self.pickups.update(dt)
         self.mobs.update(dt)
+        self.damage_texts.update(dt)
         
         
         pickups = pygame.sprite.spritecollide(self.player, self.pickups, False)
@@ -93,6 +96,7 @@ class PlayState(State):
             
         self.pickups.draw(self.game.screen)
         self.mobs.draw(self.game.screen)
+        self.damage_texts.draw(self.game.screen)
 
         self.level_timer.draw(self.game.screen)
         self.xp_bar.draw(self.game.screen)

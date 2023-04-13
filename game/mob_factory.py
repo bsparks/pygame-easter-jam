@@ -8,7 +8,7 @@ mob_types = {
     "egg_bat": {
         "image_name": "egg_bat_1.png",
         "collision_rect": (1, 22, 61, 20),
-        "health": 5,
+        "health": 2,
         "speed": 5,
         "damage": 1,
         "xp": 1,
@@ -18,7 +18,7 @@ mob_types = {
 class MobFactory:
     def __init__(self, game):
         self.game = game
-        self.spawn_time = 3000
+        self.spawn_time = 5000
         self.spawn_timer = Timer(self.spawn_time)
         self.spawn_timer.add_listener("complete", self.handle_spawn_timer_complete)
         self.spawn_amount = 1
@@ -40,7 +40,7 @@ class MobFactory:
     def spawn_mob(self):
         mob_type = random.choice(self.current_mob_types)
         mob_data = mob_types[mob_type]
-        mob = Mob(mob_data["image_name"], mob_data["collision_rect"])
+        mob = Mob(self.game, mob_data["image_name"], mob_data["collision_rect"])
         mob.health = mob_data["health"]
         mob.move_speed = mob_data["speed"]
         mob.damage = mob_data["damage"]

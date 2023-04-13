@@ -8,9 +8,10 @@ from .weapon import Weapon
 
 
 class Player(Sprite, EventHandler):
-    def __init__(self):
+    def __init__(self, game):
         Sprite.__init__(self)
         EventHandler.__init__(self)
+        self.game = game
         self.health = 100
         self.max_health = 100
         self.alive = True
@@ -88,6 +89,7 @@ class Player(Sprite, EventHandler):
         self.rect.center += self.input
         # print(self.input)
         self.collision_rect.center = self.rect.center
+        # TODO: this is messy, find a better way
         for w in self.weapons:
             side = self.rect.midright
             fx, fy = self.facing
@@ -112,6 +114,12 @@ class Player(Sprite, EventHandler):
             w.fire_point.y = side[1]
             w.fire_direction = self.facing
             w.update(dt)
+            for projectile in w:
+                for mob in self.game.state.mobs.group:
+                    if projectile.collision_rect.colliderect(mob.collision_rect):
+                        mob.take_damage(projectile.damage)
+                        projectile.kill()
+                        break
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

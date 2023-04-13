@@ -3,12 +3,14 @@ from pygame.math import Vector2
 from pygame.sprite import Sprite
 from engine.event_handler import EventHandler
 from engine.assets import load_image
+from .floating_text import FloatingText
 
 
 class Mob(EventHandler, Sprite):
-    def __init__(self, image_name, collision_rect=None):
+    def __init__(self, game, image_name, collision_rect=None):
         Sprite.__init__(self)
         EventHandler.__init__(self)
+        self.game = game
         self.image = load_image(image_name)
         self.rect = pygame.rect.FRect(self.image.get_rect())
         self.rect.centerx -= self.rect.width / 2
@@ -24,6 +26,17 @@ class Mob(EventHandler, Sprite):
         self.xp = 1
         self.damage = 1
         self.target = None
+        
+    def take_damage(self, amount):
+        dmg_text = FloatingText(amount, self.rect.center)
+        self.game.state.damage_texts.add(dmg_text)
+        self.health -= amount
+        if self.health <= 0:
+            self.die()
+            
+    def die(self):
+        self.emit("die")
+        self.kill()
         
     def update(self, dt):
         # keep collision rect centered on sprite rect
