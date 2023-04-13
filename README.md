@@ -1,13 +1,22 @@
 
-# Pygame Easter Jam - 2023
+# Pygame Easter Jam - 2023 - My Entry: Easter Survivors
 
-### Theme:
+Inspired by Vampire Survivors.
+
+## Theme
 
 Due to a tie in the votes, this jam features two themes:
 Particle Overdose
 and
 Silly Music / Pastel Color Palette
 
-### music
+## Credits
+
+Pygame-CE
+
+Music:
 https://dopeloop.ai/melody-generator
 
+Images by DALL-E modified by me
+
+Sound FX: pyfxr
