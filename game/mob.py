@@ -1,4 +1,5 @@
 import pygame
+import random
 from pygame.math import Vector2
 from pygame.sprite import Sprite
 from engine.event_handler import EventHandler
@@ -41,6 +42,8 @@ class Mob(EventHandler, Sprite):
         self.kill()
         
     def update(self, dt):
+        screen_rect = self.game.screen.get_rect()
+
         # keep collision rect centered on sprite rect
         self.collision_rect.center = self.rect.center
 
@@ -50,16 +53,21 @@ class Mob(EventHandler, Sprite):
             if move_dir.magnitude() != 0:
                 move_dir.normalize_ip()
                 
+        # if I am outside the screen, then dont worry about collision
+        if not screen_rect.contains(self.collision_rect):
+            self.rect.center += move_dir * self.move_speed / 100 * dt
+            return
+                
         # check if future location based on move_dir is colliding with anyone else in the group
         future_rect = self.collision_rect.copy()
         future_rect.center += move_dir * self.move_speed / 100 * dt
         main_group = self.groups()[0]
         for sprite in main_group:
             if sprite is not self and future_rect.colliderect(sprite.collision_rect):
-                # attempt to push slightly in the opposite direction
-                # move_dir *= -1
+                # wiggle in a random direction
+                move_dir = Vector2(random.uniform(-2, 2), random.uniform(-2, 2))
                 # stop
-                move_dir = Vector2(0, 0)
+                # move_dir = Vector2(0, 0)
                 break
         
         self.rect.center += move_dir * self.move_speed / 100 * dt

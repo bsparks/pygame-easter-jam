@@ -41,6 +41,7 @@ class Timer(EventHandler):
 
     def on_timer_complete(self):
         self.running = False
+        self.time = 0
         self.emit("complete")
 
     def update(self, dt):

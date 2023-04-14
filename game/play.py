@@ -30,8 +30,10 @@ class PlayState(State):
         self.game_over_lose_text = game_over_font.render("You Lose!", True, RED)
         self.game_over_win_text = game_over_font.render("You Win!", True, YELLOW)
 
-        load_music("merged2.mid")
-        # pygame.mixer.music.play(-1)
+        self.musics = ["merged2.mid", "merged3.mid", "merged4.mid", "merged5.mid"]
+        self.current_music = None
+        self.play_random_music()
+        
         timer_font = load_font("PressStart2P-Regular.ttf", 32)
         five_minutes = 5 * 60 * 1000  # 5 minutes
         screen_width = self.game.screen.get_width()
@@ -61,6 +63,9 @@ class PlayState(State):
         self.pickup_sound = pygame.mixer.Sound(buffer=pyfxr.pickup())
         self.pickup_sound.set_volume(0.1)
         
+        self.mob_kill_sound = pygame.mixer.Sound(buffer=pyfxr.explosion())
+        self.mob_kill_sound.set_volume(0.1)
+        
         self.damage_texts = Group()
         
         self.mobs = MobFactory(self.game)
@@ -73,11 +78,20 @@ class PlayState(State):
             pickup.position = (random.randint(0, self.game.screen.get_width()), random.randint(0, self.game.screen.get_height()))
             self.pickups.add(pickup)
             
+    def play_random_music(self):
+        music = random.choice(self.musics)
+        while music == self.current_music:
+            music = random.choice(self.musics)
+        self.current_music = music
+        load_music(music)
+        pygame.mixer.music.play(-1)
+            
     def increase_score(self, amount):
         self.score += amount
         self.score_text = self.score_font.render("Score: {}".format(self.score), True, ORANGE)
             
     def handle_mob_die(self, mob):
+        self.mob_kill_sound.play()
         self.pickups.add(XpPickup(mob.xp, mob.rect.center))
         self.increase_score(mob.xp * 100)
         
@@ -102,13 +116,13 @@ class PlayState(State):
         desc_font = load_font("PressStart2P-Regular.ttf", 12)
         for upgrade in self.upgrade_selection:
             upgrade_data = upgrade_types[upgrade]
-            name_text = name_font.render(upgrade_data["name"], True, YELLOW)
+            name_text = name_font.render(upgrade_data["name"], True, YELLOW, None, 200)
             desc_text = desc_font.render(upgrade_data["description"], True, YELLOW, None, 200)
             self.upgrade_texts.append((name_text, desc_text))
 
     def handle_level_timer_complete(self):
-        print("Level complete!")
-        self.game.change_state("main_menu")
+        self.paused = True
+        self.game_over = True
         
     def handle_level_timer_second(self, second):
         # print(f"Second! {second}")
@@ -122,15 +136,28 @@ class PlayState(State):
             
         if second == 50:
             # one time mass spawn
-            for i in range(20):
-                self.mobs.spawn_mob()
+            for i in range(25):
+                self.mobs.spawn_mob("egg_bat")
+                
+        if second == 70:
+            # spawn a mini boss
+            self.mobs.spawn_mob("egg_big_mean")
                 
         if second == 110:
+            for i in range(30):
+                self.mobs.spawn_mob()
+                
+        if second == 120:
+            self.mobs.current_mob_types.append("egg_werewolf")
+            self.mobs.spawn_amount = 5
+            
+        if second > 270:
             for i in range(30):
                 self.mobs.spawn_mob()
         
     def handle_level_timer_minute(self, minute):
         # print(f"Minute! {minute}")
+        self.play_random_music()
         self.increase_score(1000)
         if minute == 2: # technically the first minute has passed immediately
             self.mobs.current_mob_types.append("egg_werewolf")

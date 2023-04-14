@@ -11,7 +11,7 @@ weapon_types = {
         "collision_rect": (1, 14, 30, 6),
         "fire_rate": 1000,
         "damage": 1,
-        "range": 50,
+        "range": 75,
         "speed": 20,
         "rotate": True,
         "number": 1,
@@ -71,13 +71,14 @@ class Projectile(Sprite):
 class Weapon(Group):
     def __init__(self, weapon_type):
         Group.__init__(self)
-        self.weapon_type = weapon_type
+        self.name = weapon_type
         weapon_data = weapon_types[weapon_type]
         self.image_name = weapon_data["image_name"]
         self.range = weapon_data["range"]
         self.damage = weapon_data["damage"]
         self.rotate = weapon_data["rotate"]
         self.speed = weapon_data["speed"]
+        self.number = weapon_data["number"]
         self.collision_rect = weapon_data["collision_rect"]
         self.fire_rate = weapon_data["fire_rate"]
         self.fire_timer = Timer(self.fire_rate)
@@ -93,11 +94,19 @@ class Weapon(Group):
         
     def handle_fire_timer_complete(self):
         # spawn a projectile
-        self.spawn_projectile()
+        self.spawn_all_projectiles()
+        self.fire_timer.duration = self.fire_rate
         self.fire_timer.reset()
         
-    def spawn_projectile(self):
-        if self.fire_direction.magnitude() == 0:
+    def spawn_all_projectiles(self):
+        direction = self.fire_direction.copy()
+        for i in range(self.number):
+            # spread out projectiles at 15 degree intervals
+            direction = direction.rotate(30 * i)
+            self.spawn_projectile(self.fire_point.copy(), direction)
+        
+    def spawn_projectile(self, origin, direction):
+        if direction.magnitude() == 0:
             # fire to the right
-            self.fire_direction = Vector2(1, 0)
-        projectile = Projectile(self, self.fire_point, self.fire_direction.copy())
+            direction = Vector2(1, 0)
+        projectile = Projectile(self, origin, direction)

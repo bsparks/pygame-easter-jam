@@ -2,7 +2,7 @@ from .main_menu import MainMenu
 from .play import PlayState
 
 # temp for testing
-START_STATE = "play"
+START_STATE = "main_menu"
 
 class Game():
     def __init__(self, screen):

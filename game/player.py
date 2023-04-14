@@ -51,6 +51,34 @@ upgrade_types = {
         "amount": 1.1,
         "apply_type": "multiply",
     },
+    "carrot_dagger_rate": {
+        "name": "Carrot Dagger Rate",
+        "description": "Increases carrot dagger fire rate by 10%",
+        "attribute": "carrot_dagger:fire_rate",
+        "amount": 0.9,
+        "apply_type": "multiply",
+    },
+    "carrot_dagger_damage": {
+        "name": "Carrot Dagger Damage",
+        "description": "Increases carrot dagger damage by 1",
+        "attribute": "carrot_dagger:damage",
+        "amount": 1,
+        "apply_type": "add",
+    },
+    "carrot_dagger_range": {
+        "name": "Carrot Dagger Range",
+        "description": "Increases carrot dagger range by 10%",
+        "attribute": "carrot_dagger:range",
+        "amount": 1.1,
+        "apply_type": "multiply",
+    },
+    "carrot_dagger_number": {
+        "name": "Carrot Dagger Number",
+        "description": "Increases carrot dagger number of projectiles by 1",
+        "attribute": "carrot_dagger:number",
+        "amount": 1,
+        "apply_type": "add",
+    },
 }
 
 class Player(Sprite, EventHandler):
@@ -61,6 +89,9 @@ class Player(Sprite, EventHandler):
         self.health = 100
         self.max_health = 100
         self.health_regen = 0
+        self.iframes = 5
+        self.iframe_counter = 0
+        self.invincible = False
         self.damage_modifier = 1
         self.damage_base = 1
         self.magnet_radius = 75
@@ -89,12 +120,28 @@ class Player(Sprite, EventHandler):
     def apply_upgrade(self, upgrade_type):
         upgrade_data = upgrade_types[upgrade_type]
         attribute = upgrade_data["attribute"]
+        is_weapon = False
+        weapon_name = None
+        if ":" in attribute:
+            is_weapon = True
+            weapon_name, attribute = attribute.split(":")
         apply_type = upgrade_data["apply_type"]
         amount = upgrade_data["amount"]
+        
         if apply_type == "add":
-            setattr(self, attribute, getattr(self, attribute) + amount)
+            if is_weapon:
+                for weapon in self.weapons:
+                    if weapon.name == weapon_name:
+                        setattr(weapon, attribute, getattr(weapon, attribute) + amount)
+            else:
+                setattr(self, attribute, getattr(self, attribute) + amount)
         elif apply_type == "multiply":
-            setattr(self, attribute, getattr(self, attribute) * amount)
+            if is_weapon:
+                for weapon in self.weapons:
+                    if weapon.name == weapon_name:
+                        setattr(weapon, attribute, getattr(weapon, attribute) * amount)
+            else:
+                setattr(self, attribute, getattr(self, attribute) * amount)
 
     def heal(self, amount):
         self.health += amount
@@ -102,9 +149,12 @@ class Player(Sprite, EventHandler):
             self.health = self.max_health
 
     def take_damage(self, amount):
+        if self.invincible:
+            return
         self.health -= amount
         if self.health <= 0:
             self.die()
+        self.invincible = True
 
     def die(self):
         self.alive = False
@@ -154,6 +204,12 @@ class Player(Sprite, EventHandler):
     def update(self, dt):
         if not self.alive:
             return
+        
+        if self.invincible:
+            self.iframe_counter += 1
+            if self.iframe_counter >= self.iframes:
+                self.invincible = False
+                self.iframe_counter = 0
         
         # do pickup magnet
         for pickup in self.game.state.pickups:

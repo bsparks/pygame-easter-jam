@@ -38,6 +38,14 @@ mob_types = {
         "damage": 10,
         "xp": 10,
     },
+    "egg_big_mean": {
+        "image_name": "egg_big_mean.png",
+        "collision_rect": (26, 15, 76, 99),
+        "health": 50,
+        "speed": 2,
+        "damage": 20,
+        "xp": 30,
+    },
 }
 
 class MobFactory(EventHandler):
