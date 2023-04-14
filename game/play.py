@@ -95,7 +95,7 @@ class PlayState(State):
         self.mob_kill_sound.play()
         self.pickups.add(XpPickup(mob.xp, mob.rect.center))
         self.increase_score(mob.xp * 100)
-        if self.final_boss:
+        if self.final_boss and mob.name == "bunny_vamp_boss":
             self.final_boss = False
             self.game_over = True
             self.paused = True

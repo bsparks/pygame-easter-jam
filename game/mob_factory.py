@@ -20,7 +20,7 @@ mob_types = {
         "health": 4,
         "speed": 3,
         "damage": 2,
-        "xp": 2,
+        "xp": 3,
     },
     "egg_werewolf": {
         "image_name": "egg_werewolf.png",
@@ -28,7 +28,7 @@ mob_types = {
         "health": 6,
         "speed": 5,
         "damage": 3,
-        "xp": 5,
+        "xp": 8,
     },
     "egg_barbarian": {
         "image_name": "egg_barb.png",
@@ -36,7 +36,7 @@ mob_types = {
         "health": 15,
         "speed": 3,
         "damage": 6,
-        "xp": 15,
+        "xp": 20,
     },
     "egg_skelington": {
         "image_name": "egg_skelington.png",
@@ -44,7 +44,7 @@ mob_types = {
         "health": 10,
         "speed": 3,
         "damage": 5,
-        "xp": 10,
+        "xp": 15,
     },
     "egg_big_mean": {
         "image_name": "egg_big_mean.png",
@@ -52,7 +52,7 @@ mob_types = {
         "health": 50,
         "speed": 2,
         "damage": 15,
-        "xp": 30,
+        "xp": 50,
     },
     "bunny_vamp_boss": {
         "image_name": "bunny_vamp_boss.png",
@@ -93,7 +93,7 @@ class MobFactory(EventHandler):
     def spawn_mob(self, type_to_spawn = None):
         mob_type = random.choice(self.current_mob_types) if type_to_spawn is None else type_to_spawn
         mob_data = mob_types[mob_type]
-        mob = Mob(self.game, mob_data["image_name"], mob_data["collision_rect"])
+        mob = Mob(self.game, mob_type, mob_data["image_name"], mob_data["collision_rect"])
         mob.health = mob_data["health"]
         mob.move_speed = mob_data["speed"]
         mob.damage = mob_data["damage"]

@@ -11,9 +11,9 @@ from .weapon import Weapon
 upgrade_types = {
     "health": {
         "name": "Health",
-        "description": "Increases max health by 10",
+        "description": "Increases max health by 20",
         "attribute": "max_health",
-        "amount": 10,
+        "amount": 20,
         "apply_type": "add",
     },
     "health_regen": {
@@ -25,16 +25,16 @@ upgrade_types = {
     },
     "move_speed": {
         "name": "Move Speed",
-        "description": "Increases move speed by 10%",
+        "description": "Increases move speed by 20%",
         "attribute": "move_speed",
-        "amount": 1.1,
+        "amount": 1.2,
         "apply_type": "multiply",
     },
     "damage_modifier": {
         "name": "Damage Modifier",
-        "description": "Increases damage by 10% to all weapons",
+        "description": "Increases damage by 20% to all weapons",
         "attribute": "damage_modifier",
-        "amount": 0.1,
+        "amount": 0.2,
         "apply_type": "add",
     },
     "damage_base": {
@@ -46,16 +46,16 @@ upgrade_types = {
     },
     "magnet_radius": {
         "name": "Magnet Radius",
-        "description": "Increases magnet radius by 10%",
+        "description": "Increases magnet radius by 20%",
         "attribute": "magnet_radius",
-        "amount": 1.1,
+        "amount": 1.2,
         "apply_type": "multiply",
     },
     "carrot_dagger_rate": {
         "name": "Carrot Dagger Rate",
-        "description": "Increases carrot dagger fire rate by 10%",
+        "description": "Increases carrot dagger fire rate by 20%",
         "attribute": "carrot_dagger:fire_rate",
-        "amount": 0.9,
+        "amount": 0.8,
         "apply_type": "multiply",
     },
     "carrot_dagger_damage": {
@@ -67,9 +67,9 @@ upgrade_types = {
     },
     "carrot_dagger_range": {
         "name": "Carrot Dagger Range",
-        "description": "Increases carrot dagger range by 10%",
+        "description": "Increases carrot dagger range by 20%",
         "attribute": "carrot_dagger:range",
-        "amount": 1.1,
+        "amount": 1.2,
         "apply_type": "multiply",
     },
     "carrot_dagger_number": {
@@ -284,7 +284,7 @@ class Player(Sprite, EventHandler):
 
         surface.blit(self.image, self.rect)
         self.health_bar.draw(surface)
-        self.debug_draw(surface)
+        #self.debug_draw(surface)
         for w in self.weapons:
             w.draw(surface)
 

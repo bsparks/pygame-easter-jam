@@ -8,10 +8,11 @@ from .floating_text import FloatingText
 
 
 class Mob(EventHandler, Sprite):
-    def __init__(self, game, image_name, collision_rect=None):
+    def __init__(self, game, name, image_name, collision_rect=None):
         Sprite.__init__(self)
         EventHandler.__init__(self)
         self.game = game
+        self.name = name
         self.image = load_image(image_name)
         self.rect = pygame.rect.FRect(self.image.get_rect())
         self.rect.centerx -= self.rect.width / 2
@@ -65,7 +66,7 @@ class Mob(EventHandler, Sprite):
         for sprite in main_group:
             if sprite is not self and future_rect.colliderect(sprite.collision_rect):
                 # wiggle in a random direction
-                move_dir = Vector2(random.uniform(-2, 2), random.uniform(-2, 2))
+                move_dir = Vector2(random.uniform(-5, 5), random.uniform(-5, 5))
                 # stop
                 # move_dir = Vector2(0, 0)
                 break
