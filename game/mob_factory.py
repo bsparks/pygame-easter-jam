@@ -27,15 +27,23 @@ mob_types = {
         "collision_rect": (17, 5, 30, 54),
         "health": 6,
         "speed": 5,
-        "damage": 5,
+        "damage": 3,
         "xp": 5,
     },
     "egg_barbarian": {
         "image_name": "egg_barb.png",
         "collision_rect": (13, 5, 38, 53),
+        "health": 15,
+        "speed": 3,
+        "damage": 6,
+        "xp": 15,
+    },
+    "egg_skelington": {
+        "image_name": "egg_skelington.png",
+        "collision_rect": (16, 5, 31, 56),
         "health": 10,
         "speed": 3,
-        "damage": 10,
+        "damage": 5,
         "xp": 10,
     },
     "egg_big_mean": {
@@ -43,8 +51,16 @@ mob_types = {
         "collision_rect": (26, 15, 76, 99),
         "health": 50,
         "speed": 2,
-        "damage": 20,
+        "damage": 15,
         "xp": 30,
+    },
+    "bunny_vamp_boss": {
+        "image_name": "bunny_vamp_boss.png",
+        "collision_rect": (41, 0, 172, 248),
+        "health": 200,
+        "speed": 3,
+        "damage": 25,
+        "xp": 100,
     },
 }
 

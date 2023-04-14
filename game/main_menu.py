@@ -18,6 +18,7 @@ class MainMenu(State):
         subtitle_font = load_font("PressStart2P-Regular.ttf", 32)
         self.subtitle_text = subtitle_font.render(self.subtitle, True, "white")
         self.title_texts = []
+        self.press_start_text = subtitle_font.render("Press [SPACE] to Start", True, RED, None, 450)
         self.emitters = []
         for i in range(len(self.title)):
             self.title_texts.append(title_font.render(self.title[i], True, "#9b4d53"))
@@ -52,6 +53,8 @@ class MainMenu(State):
         pygame.draw.ellipse(self.screen, ORANGE, (850, 100, 100, 100))
         
         self.screen.blit(self.subtitle_text, (200, 350))
+        
+        self.screen.blit(self.press_start_text, (100, 450))
         
         for i in range(len(self.title_texts)):
             self.screen.blit(self.title_texts[i], (125 + i * 150, 125))

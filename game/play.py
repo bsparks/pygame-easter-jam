@@ -18,6 +18,7 @@ class PlayState(State):
         self.paused = False
         self.game_over = False
         self.choose_upgrades = False
+        self.final_boss = False
         
         self.upgrade_selection = []
         self.upgrade_emitters = []
@@ -94,6 +95,10 @@ class PlayState(State):
         self.mob_kill_sound.play()
         self.pickups.add(XpPickup(mob.xp, mob.rect.center))
         self.increase_score(mob.xp * 100)
+        if self.final_boss:
+            self.final_boss = False
+            self.game_over = True
+            self.paused = True
         
     def handle_player_die(self):
         self.paused = True
@@ -126,34 +131,40 @@ class PlayState(State):
         
     def handle_level_timer_second(self, second):
         # print(f"Second! {second}")
-        if second == 30:
+        if second == 20:
             self.mobs.current_mob_types.append("egg_zombie")
             self.mobs.spawn_amount = 2
+            
+        if second == 60:
+            # one time mass spawn
+            for i in range(10):
+                self.mobs.spawn_mob("egg_bat")
         
-        if second == 90:
-            self.mobs.current_mob_types.append("egg_barbarian")
+        if second == 80:
+            self.mobs.current_mob_types.append("egg_skelington")
             self.mobs.spawn_amount = 3
             
-        if second == 50:
-            # one time mass spawn
-            for i in range(25):
-                self.mobs.spawn_mob("egg_bat")
-                
-        if second == 70:
+        if second == 100:
+            for i in range(20):
+                self.mobs.spawn_mob()
+
+        if second == 120:
             # spawn a mini boss
             self.mobs.spawn_mob("egg_big_mean")
-                
-        if second == 110:
-            for i in range(30):
-                self.mobs.spawn_mob()
-                
-        if second == 120:
-            self.mobs.current_mob_types.append("egg_werewolf")
+
+        if second == 130:
+            self.mobs.current_mob_types.append("egg_barbarian")
             self.mobs.spawn_amount = 5
             
-        if second > 270:
-            for i in range(30):
+        if second > 270 < 290:
+            for i in range(10):
                 self.mobs.spawn_mob()
+                
+        if second == 290:
+            self.mobs.pause()
+            self.mobs.group.empty()
+            self.mobs.spawn_mob("bunny_vamp_boss")
+            self.final_boss = True
         
     def handle_level_timer_minute(self, minute):
         # print(f"Minute! {minute}")
