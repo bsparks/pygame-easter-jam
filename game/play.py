@@ -96,7 +96,7 @@ class PlayState(State):
         self.paused = True
         self.choose_upgrades = True
         # choose 3 of the upgrade_types keys
-        self.upgrade_selection = random.sample(upgrade_types.keys(), 3)
+        self.upgrade_selection = random.sample(sorted(upgrade_types), 3)
         self.upgrade_texts = []
         name_font = load_font("PressStart2P-Regular.ttf", 16)
         desc_font = load_font("PressStart2P-Regular.ttf", 12)

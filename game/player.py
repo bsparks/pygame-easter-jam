@@ -44,6 +44,13 @@ upgrade_types = {
         "amount": 1,
         "apply_type": "add",
     },
+    "magnet_radius": {
+        "name": "Magnet Radius",
+        "description": "Increases magnet radius by 10%",
+        "attribute": "magnet_radius",
+        "amount": 1.1,
+        "apply_type": "multiply",
+    },
 }
 
 class Player(Sprite, EventHandler):
@@ -56,6 +63,7 @@ class Player(Sprite, EventHandler):
         self.health_regen = 0
         self.damage_modifier = 1
         self.damage_base = 1
+        self.magnet_radius = 75
         self.alive = True
         self.xp = 0
         self.level = 1
@@ -111,11 +119,11 @@ class Player(Sprite, EventHandler):
         if self.level == 1:
             xp_needed = 5
         elif self.level > 1 < 20:
-            xp_needed = 5 + (self.level - 1) * 10
+            xp_needed = (self.level - 1) * 7
         elif self.level >= 20 < 40:
-            xp_needed = 5 + (self.level - 1) * 15
+            xp_needed = (self.level - 1) * 15
         elif self.level >= 40:
-            xp_needed = 5 + (self.level - 1) * 20
+            xp_needed = (self.level - 1) * 23
         return xp_needed
 
     def check_level_up(self):
@@ -146,6 +154,11 @@ class Player(Sprite, EventHandler):
     def update(self, dt):
         if not self.alive:
             return
+        
+        # do pickup magnet
+        for pickup in self.game.state.pickups:
+            if Vector2(pickup.rect.center).distance_to(self.rect.center) <= self.magnet_radius:
+                pickup.target = self.rect.center
         
         self.health_regen_timer.update(dt)
 
@@ -215,9 +228,10 @@ class Player(Sprite, EventHandler):
 
         surface.blit(self.image, self.rect)
         self.health_bar.draw(surface)
-        # self.debug_draw(surface)
+        self.debug_draw(surface)
         for w in self.weapons:
             w.draw(surface)
 
     def debug_draw(self, surface):
         pygame.draw.rect(surface, "red", self.collision_rect, 2)
+        pygame.draw.circle(surface, "blue", self.rect.center, self.magnet_radius, 2)

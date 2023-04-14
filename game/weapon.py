@@ -13,8 +13,19 @@ weapon_types = {
         "damage": 1,
         "range": 50,
         "speed": 20,
-        "rotate": True
+        "rotate": True,
+        "number": 1,
     },
+    "orbit_egg": {
+        "image_name": "egg_16.png",
+        "collision_rect": (2, 0, 11, 15),
+        "fire_rate": 1000,
+        "damage": 1,
+        "range": 50,
+        "speed": 20,
+        "rotate": False,
+        "number": 1,
+    }
 }
 
 class Projectile(Sprite):
@@ -60,6 +71,7 @@ class Projectile(Sprite):
 class Weapon(Group):
     def __init__(self, weapon_type):
         Group.__init__(self)
+        self.weapon_type = weapon_type
         weapon_data = weapon_types[weapon_type]
         self.image_name = weapon_data["image_name"]
         self.range = weapon_data["range"]
