@@ -32,5 +32,7 @@ Images by DALL-E modified by me
 
 Sound FX: pyfxr
 
+Font: https://fonts.google.com/specimen/Press+Start+2P/about
+
 LICENSE:
 MIT
