@@ -31,3 +31,6 @@ https://dopeloop.ai/melody-generator
 Images by DALL-E modified by me
 
 Sound FX: pyfxr
+
+LICENSE:
+MIT
